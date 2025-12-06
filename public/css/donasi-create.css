@@ -1,0 +1,370 @@
+/* File: public/css/donasi-create.css */
+
+:root {
+    --primary-green: #10b981;
+    --primary-green-hover: #059669;
+    --dark-green: #047857;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --bg-light: #f9fafb;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Form Card */
+.form-donasi-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
+
+.form-title i {
+    color: var(--primary-green);
+    margin-right: 0.5rem;
+}
+
+/* Alert Kebutuhan */
+.kebutuhan-alert {
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.kebutuhan-name {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.kebutuhan-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.kebutuhan-badge.uang {
+    background: var(--success-light);
+    color: var(--dark-green);
+}
+
+.kebutuhan-badge.barang {
+    background: var(--info-light);
+    color: #1e40af;
+}
+
+/* Form Group */
+.form-group-custom {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-custom {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-label-custom .required {
+    color: #ef4444;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px var(--success-light);
+}
+
+.form-control-custom.is-invalid {
+    border-color: #ef4444;
+}
+
+.invalid-feedback {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Input Group */
+.input-group-custom {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group-text {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.input-group-text:first-child {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+}
+
+.input-group-custom .form-control-custom {
+    border-radius: 0 8px 8px 0;
+}
+
+.input-group-text:last-child {
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+    background: var(--info);
+    color: white;
+}
+
+/* Helper Text */
+.form-text-muted {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-text-muted i {
+    margin-right: 0.25rem;
+}
+
+/* Image Preview */
+.image-preview-container {
+    margin-top: 1rem;
+    display: none;
+}
+
+.preview-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.preview-image {
+    max-height: 200px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+}
+
+/* Alert Warning */
+.alert-warning-custom {
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-left: 4px solid var(--warning);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-warning-custom i {
+    color: var(--warning);
+    margin-right: 0.5rem;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-submit {
+    padding: 0.875rem 2rem;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit:hover {
+    background: var(--primary-green-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-cancel {
+    padding: 0.875rem 2rem;
+    background: white;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    background: var(--bg-light);
+    color: var(--text-dark);
+}
+
+/* Sidebar Cards */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+.info-card-title i {
+    color: var(--primary-green);
+    margin-right: 0.5rem;
+}
+
+.info-card-text {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+/* Progress Info */
+.progress-info-item {
+    margin-bottom: 1rem;
+}
+
+.progress-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.progress-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.progress-value.primary {
+    color: var(--primary-green);
+}
+
+.progress-bar-wrapper {
+    height: 10px;
+    background: var(--bg-light);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    border-radius: 5px;
+    transition: width 0.6s ease;
+}
+
+.progress-percentage {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* Guide List */
+.guide-list {
+    padding-left: 1.5rem;
+    margin: 0;
+}
+
+.guide-list li {
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Bank Info */
+.bank-info-box {
+    background: var(--success-light);
+    border: 1px solid var(--primary-green);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.bank-info-box strong {
+    color: var(--dark-green);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.bank-info-box small {
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.address-info-box {
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.address-info-box strong {
+    color: #1e40af;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.address-info-box small {
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-donasi-card {
+        padding: 1.5rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .btn-submit,
+    .btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,767 @@
+/* ================================================
+    SISTEM DONASI PANTI - CUSTOM STYLESHEET (gabungan dari <style> dan CSS tambahan)
+    Warna Tema: Hijau (#10b981) 
+    ================================================ */
+
+/* ROOT VARIABLES (Diperbarui untuk menggabungkan semua variabel) */
+:root {
+    --primary-green: #10b981;
+    --dark-green: #059669; /* Sama dengan --primary-green-dark di CSS tambahan */
+    --primary-green-dark: #059669;
+    --primary-green-light: #d1fae5;
+    --secondary-gray: #6b7280;
+    --light-bg: #f8f9fa; /* Diambil dari body style di HTML, lebih spesifik dari f9fafb */
+    --border-color: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* Variabel dari HTML Style */
+    --sidebar-width: 260px;
+    --topbar-height: 70px;
+}
+
+/* GLOBAL STYLES (Gabungan) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Dipertahankan dari HTML */
+    background-color: #f8f9fa; /* Dipertahankan dari HTML */
+    color: #1f2937; /* Dari CSS tambahan */
+    line-height: 1.6; /* Dari CSS tambahan */
+}
+
+/* TEXT UTILITIES (Dari CSS tambahan) */
+.text-primary-green {
+    color: var(--primary-green) !important;
+}
+
+/* SIDEBAR STYLES (Diperbarui dengan CSS dari <style> HTML) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar-brand {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar-brand h3 {
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.sidebar-brand p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.85rem;
+    margin: 5px 0 0 0;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.sidebar-menu-item {
+    margin: 5px 15px;
+}
+
+.sidebar-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.sidebar-menu-link:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar-menu-link.active {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    font-weight: 600;
+}
+
+.sidebar-menu-link i {
+    width: 25px;
+    font-size: 1.1rem;
+    margin-right: 12px;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    margin: 15px 20px;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+/* TOPBAR */
+.topbar {
+    background: white;
+    height: var(--topbar-height);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.topbar-left h5 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 15px;
+    background: #f8f9fa;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: #e9ecef;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-info .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.2;
+}
+
+.user-info .role {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Content Area */
+.content-area {
+    padding: 30px;
+}
+
+/* Stats Cards (Gabungan) */
+.card-stats {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Dari HTML style */
+    transition: all 0.3s ease;
+    overflow: hidden;
+    
+    /* Tambahan dari CSS tambahan */
+    border-left: 4px solid var(--primary-green);
+    box-shadow: var(--shadow); /* Override shadow */
+}
+
+.card-stats:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.card-stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.card-stats h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    
+    /* Tambahan dari CSS tambahan */
+    font-size: 1.75rem; /* Override size */
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.card-stats p {
+    color: #6c757d;
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    
+    /* Tambahan dari CSS tambahan */
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Custom Card (Gabungan) */
+.card-custom {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    background: white;
+    
+    /* Tambahan dari CSS tambahan */
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Table (Gabungan) */
+.table-custom {
+    margin: 0;
+    
+    /* Tambahan dari CSS tambahan */
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-custom thead {
+    background: #f8f9fa;
+}
+
+.table-custom th {
+    border: none;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 15px;
+    
+    /* Tambahan dari CSS tambahan */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Override background */
+    color: white; /* Override color */
+    letter-spacing: 0.5px;
+    padding: 16px;
+}
+
+.table-custom thead th:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+.table-custom thead th:last-child {
+    border-radius: 0 10px 0 0;
+}
+
+.table-custom td {
+    border: none;
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+    
+    /* Tambahan dari CSS tambahan */
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6; /* Override border-bottom */
+}
+
+.table-custom tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-custom tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Badges (Gabungan) */
+.badge-warning-custom {
+    background: #fef3c7;
+    color: #d97706;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    
+    /* Tambahan dari CSS tambahan */
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge-success-custom {
+    background: #d1fae5;
+    color: #059669;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    
+    /* Tambahan dari CSS tambahan */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge-danger-custom {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    
+    /* Tambahan dari CSS tambahan */
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Responsif (Diambil dari <style> HTML) */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .mobile-toggle {
+        display: block !important;
+    }
+    
+    /* Tambahan dari CSS tambahan */
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+    
+    /* Catatan: sidebar responsive sudah diatur di atas */
+    
+    .card-stats h3 {
+        font-size: 1.25rem;
+    }
+    
+    .table-custom {
+        font-size: 0.875rem;
+    }
+}
+
+.mobile-toggle {
+    display: none;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- STYLE TAMBAHAN DARI CSS DI BAWAH CODE HTML --- */
+
+/* CARD STYLES */
+.card-need {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-need .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-need .card-body > *:last-child {
+    margin-top: auto;
+}
+
+/* BADGE STYLES */
+.badge-jenis {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-jenis.uang {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.badge-jenis.barang {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+/* PROGRESS BAR */
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transition: width 0.6s ease;
+}
+
+/* BUTTON STYLES */
+.btn-primary-custom {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary-custom:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+.btn-secondary-custom {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-custom:hover {
+    background: #e5e7eb;
+    color: #374151;
+    transform: translateY(-1px);
+}
+
+/* FORM STYLES */
+.form-control-custom {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.form-control-custom:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    outline: none;
+}
+
+.form-label-custom {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+/* SIDEBAR ADMIN (Diabaikan karena konflik dengan CSS Sidebar utama) */
+/* Stats Card (Diabaikan karena konflik dengan CSS Stats Card utama) */
+
+/* NAVBAR CUSTOM */
+.navbar-custom {
+    background: white;
+    box-shadow: var(--shadow);
+    padding: 1rem 0;
+}
+
+.navbar-custom .navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-green);
+}
+
+.navbar-custom .nav-link {
+    color: #6b7280;
+    font-weight: 500;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.navbar-custom .nav-link:hover {
+    color: var(--primary-green);
+}
+
+/* HERO SECTION */
+.hero-section {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 80px 0;
+    border-radius: 0 0 50px 50px;
+    box-shadow: var(--shadow-lg);
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.25rem;
+    opacity: 0.95;
+}
+
+/* SECTION TITLE */
+.section-title {
+    position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 40px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    border-radius: 2px;
+}
+
+/* ANIMATIONS */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ALERT CUSTOM */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 16px 20px;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.alert-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.alert-info {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-green);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-green-dark);
+}
+
+.breadcrumb-item.active {
+    color: #6b7280;
+}
+
+/* PAGINATION */
+.pagination .page-link {
+    color: var(--primary-green);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin: 0 4px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--primary-green-light);
+    border-color: var(--primary-green);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: var(--primary-green);
+}
+
+/* LOADING SPINNER */
+.spinner-border-custom {
+    border-color: var(--primary-green);
+    border-right-color: transparent;
+}
+
+/* EMPTY STATE */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 20px;
+}
+
+.empty-state h5 {
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #9ca3af;
+}
+
+/* TOOLTIP CUSTOM */
+.tooltip-custom {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-custom .tooltiptext {
+    visibility: hidden;
+    background-color: #1f2937;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.875rem;
+}
+
+.tooltip-custom:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* IMAGE HOVER EFFECT */
+.img-hover-zoom {
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.img-hover-zoom img {
+    transition: transform 0.5s ease;
+}
+
+.img-hover-zoom:hover img {
+    transform: scale(1.1);
+}
+
+/* PRINT STYLES */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .card-custom {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+}

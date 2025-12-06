@@ -1,0 +1,475 @@
+/* File: public/css/admin-donasi.css */
+
+:root {
+    --primary-green: #10b981;
+    --primary-green-hover: #059669;
+    --dark-green: #047857;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --success-light: #d1fae5;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --bg-light: #f9fafb;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Alert Styles */
+.alert-success {
+    background: var(--success-light);
+    border: 1px solid var(--primary-green);
+    color: var(--dark-green);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.page-title i {
+    color: var(--primary-green);
+    margin-right: 0.5rem;
+}
+
+/* Stats Cards - Donasi */
+.donasi-stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border-left: 4px solid;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.donasi-stats-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.donasi-stats-card.warning {
+    border-left-color: var(--warning);
+}
+
+.donasi-stats-card.success {
+    border-left-color: var(--primary-green);
+}
+
+.donasi-stats-card.danger {
+    border-left-color: var(--danger);
+}
+
+.donasi-stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.donasi-stats-icon.warning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.donasi-stats-icon.success {
+    background: var(--success-light);
+    color: var(--primary-green);
+}
+
+.donasi-stats-icon.danger {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.donasi-stats-info {
+    margin-left: 1rem;
+}
+
+.donasi-stats-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.donasi-stats-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.donasi-stats-value.warning {
+    color: var(--warning);
+}
+
+.donasi-stats-value.success {
+    color: var(--primary-green);
+}
+
+.donasi-stats-value.danger {
+    color: var(--danger);
+}
+
+/* Filter Section */
+.filter-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-form {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    min-width: 180px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: var(--text-dark);
+    background: white;
+    transition: all 0.2s;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px var(--success-light);
+}
+
+.btn-filter {
+    padding: 0.625rem 1.25rem;
+    background: var(--text-dark);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-filter:hover {
+    background: #374151;
+    color: white;
+}
+
+.btn-reset {
+    padding: 0.625rem 1.25rem;
+    background: white;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-reset:hover {
+    background: var(--bg-light);
+    border-color: var(--text-muted);
+    color: var(--text-dark);
+}
+
+.btn-report {
+    padding: 0.625rem 1.5rem;
+    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-report:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    color: white;
+}
+
+/* Table Styles */
+.donasi-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.donasi-table-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.donasi-table-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.donasi-table-title i {
+    color: var(--primary-green);
+    margin-right: 0.5rem;
+}
+
+.donasi-table-body {
+    padding: 1.5rem;
+}
+
+.donasi-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.donasi-table thead th {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.donasi-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.donasi-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.donasi-table tbody tr:hover {
+    background: var(--bg-light);
+}
+
+.donasi-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Table Content */
+.donatur-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    display: block;
+}
+
+.donatur-email {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.kebutuhan-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.kebutuhan-badge.uang {
+    background: var(--success-light);
+    color: var(--dark-green);
+}
+
+.kebutuhan-badge.barang {
+    background: var(--info-light);
+    color: #1e40af;
+}
+
+.amount-value {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-badge.menunggu {
+    background: var(--warning-light);
+    color: #92400e;
+}
+
+.status-badge.berhasil {
+    background: var(--success-light);
+    color: var(--dark-green);
+}
+
+.status-badge.ditolak {
+    background: var(--danger-light);
+    color: #991b1b;
+}
+
+/* Action Buttons */
+.action-group {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.btn-table-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid;
+    background: white;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-table-action.view {
+    border-color: #3b82f6;
+    color: #2563eb;
+}
+
+.btn-table-action.view:hover {
+    background: var(--info-light);
+    border-color: #2563eb;
+}
+
+.btn-table-action.verify {
+    border-color: var(--warning);
+    color: #d97706;
+}
+
+.btn-table-action.verify:hover {
+    background: var(--warning-light);
+    border-color: #d97706;
+}
+
+.btn-table-action.delete {
+    border-color: #f87171;
+    color: var(--danger);
+}
+
+.btn-table-action.delete:hover {
+    background: var(--danger-light);
+    border-color: #dc2626;
+}
+
+/* Empty State */
+.empty-state-donasi {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--text-muted);
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+/* Modal */
+.modal-header.danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.modal-header.danger .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.delete-warning {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--warning-light);
+    border-left: 3px solid var(--warning);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #92400e;
+}
+
+.delete-warning i {
+    color: var(--warning);
+    margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-form {
+        width: 100%;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+    
+    .donasi-stats-value {
+        font-size: 1.5rem;
+    }
+    
+    .donasi-table {
+        font-size: 0.875rem;
+    }
+    
+    .donasi-table thead th,
+    .donasi-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+}

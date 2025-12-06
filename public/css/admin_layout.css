@@ -1,0 +1,570 @@
+/* ================================================
+    ADMIN PANEL LAYOUT STYLES
+    Gaya khusus untuk Sidebar, Topbar, dan Struktur Konten Utama.
+    ================================================ */
+
+/* ROOT VARIABLES */
+:root {
+    --primary-green: #10b981;
+    --dark-green: #059669;
+    --sidebar-width: 260px;
+    --topbar-height: 70px;
+}
+
+/* GLOBAL RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* ------------------- SIDEBAR STYLES ------------------- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar-brand {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar-brand h3 {
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.sidebar-brand p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.85rem;
+    margin: 5px 0 0 0;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.sidebar-menu-item {
+    margin: 5px 15px;
+}
+
+.sidebar-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.sidebar-menu-link:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Gaya Link Aktif */
+.sidebar-menu-link.active {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    font-weight: 600;
+}
+
+.sidebar-menu-link i {
+    width: 25px;
+    font-size: 1.1rem;
+    margin-right: 12px;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    margin: 15px 20px;
+}
+
+/* ------------------- MAIN CONTENT & TOPBAR ------------------- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.topbar {
+    background: white;
+    height: var(--topbar-height);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.topbar-left h5 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 15px;
+    background: #f8f9fa;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: #e9ecef;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.user-info .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.2;
+}
+
+.user-info .role {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Content Area */
+.content-area {
+    padding: 30px;
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+    display: none;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ------------------- RESPONSIVE ------------------- */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .mobile-toggle {
+        display: block !important;
+    }
+}
+
+/**
+ * ============================================================================
+ * ADMIN SETTINGS PAGE CSS
+ * ============================================================================
+ * File: admin_settings.css
+ * Deskripsi: Stylesheet khusus untuk halaman pengaturan sistem admin
+ * Lokasi: public/css/admin_settings.css
+ * ============================================================================
+ */
+
+/* ============================================================================
+   VARIABEL GLOBAL
+   ============================================================================ */
+:root {
+    --primary-green: #10b981; 
+    --dark-green: #059669;
+    --light-green: #d1fae5;
+    --border-color: #e5e7eb;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   PAGE HEADER
+   ============================================================================ */
+.page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.text-primary-green {
+    color: var(--primary-green) !important;
+}
+
+/* ============================================================================
+   BREADCRUMB
+   ============================================================================ */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--dark-green);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--gray-500);
+}
+
+/* ============================================================================
+   CUSTOM ALERTS
+   ============================================================================ */
+.custom-alert {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background-color: var(--light-green);
+    color: var(--dark-green);
+    border-left: 4px solid var(--primary-green);
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #dc2626;
+}
+
+/* ============================================================================
+   SETTINGS CARD
+   ============================================================================ */
+.settings-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.settings-card-header {
+    background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--primary-green);
+}
+
+.settings-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+}
+
+.settings-card-subtitle {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+}
+
+.settings-card-body {
+    padding: 2rem;
+}
+
+.settings-card-footer {
+    padding: 1.5rem 2rem;
+    background: var(--gray-50);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* ============================================================================
+   FORM GROUPS
+   ============================================================================ */
+.form-group-custom {
+    margin-bottom: 1.75rem;
+}
+
+.form-group-custom:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-label-custom {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+/* ============================================================================
+   FORM CONTROLS
+   ============================================================================ */
+.form-control-custom {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--gray-900);
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-custom:focus {
+    color: var(--gray-900);
+    background-color: white;
+    border-color: var(--primary-green);
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.form-control-custom::placeholder {
+    color: var(--gray-500);
+    opacity: 0.7;
+}
+
+.form-control-custom.is-invalid {
+    border-color: #dc2626;
+}
+
+.form-control-custom.is-invalid:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
+textarea.form-control-custom {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ============================================================================
+   FORM TEXT & FEEDBACK
+   ============================================================================ */
+.form-text {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+.invalid-feedback {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: #dc2626;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+.btn {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-primary-custom:hover {
+    background: linear-gradient(135deg, var(--dark-green) 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary-custom:active {
+    transform: translateY(0);
+}
+
+.btn-secondary-custom {
+    background: white;
+    color: var(--gray-700);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary-custom:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-500);
+    color: var(--gray-900);
+}
+
+/* ============================================================================
+   INFO CARD
+   ============================================================================ */
+.info-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fbbf24;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    color: #78350f;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-card i {
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.custom-alert {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN - TABLET
+   ============================================================================ */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .settings-card-header,
+    .settings-card-body {
+        padding: 1.25rem;
+    }
+
+    .settings-card-footer {
+        padding: 1.25rem;
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .form-label-custom {
+        font-size: 0.875rem;
+    }
+
+    .form-control-custom {
+        font-size: 0.875rem;
+        padding: 0.625rem 0.875rem;
+    }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================================================ */
+@media (max-width: 576px) {
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .info-card {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* ============================================================================
+   END OF FILE
+   ============================================================================ */
