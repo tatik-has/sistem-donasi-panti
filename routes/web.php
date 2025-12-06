@@ -46,6 +46,18 @@ Route::middleware('auth')->group(function () {
 });
 
 // ===============================================
+// CSRF TOKEN REFRESH ROUTE
+// ===============================================
+Route::middleware(['web'])->group(function () {
+    Route::get('/refresh-csrf', function () {
+        return response()->json([
+            'token' => csrf_token(),
+            'timestamp' => now()->toDateTimeString()
+        ]);
+    })->name('refresh.csrf');
+});
+
+// ===============================================
 // NOTIFICATION ROUTES (SHARED: Admin & Donatur)
 // ===============================================
 Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
@@ -73,7 +85,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         Route::get('/laporan', [AdminDonasiController::class, 'laporan'])->name('laporan');
         Route::get('/laporan/export-pdf', [AdminDonasiController::class, 'exportPdf'])->name('laporan.export-pdf');
         Route::get('/{donasi}', [AdminDonasiController::class, 'show'])->name('show');
-        Route::post('/{donasi}/verifikasi', [AdminDonasiController::class, 'verifikasi'])->name('verifikasi');
+        Route::post('/{id}/verifikasi', [AdminDonasiController::class, 'verifikasi'])->name('verifikasi');
         Route::delete('/{donasi}', [AdminDonasiController::class, 'destroy'])->name('destroy');
     });
     
@@ -96,7 +108,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 });
 
 // ===============================================
-// DONATUR ROUTES (REVISI)
+// DONATUR ROUTES (FIXED)
 // ===============================================
 Route::prefix('donatur')->name('donatur.')->middleware(['auth', 'donatur'])->group(function () {
     
@@ -104,15 +116,16 @@ Route::prefix('donatur')->name('donatur.')->middleware(['auth', 'donatur'])->gro
     Route::get('/dashboard', [DonaturDashboard::class, 'index'])->name('dashboard');
     
     // ============= DONASI (Donasi Aktif & Buat Donasi) =============
-    // Nama route: donatur.donasi.index, donatur.donasi.create, donatur.donasi.store
     Route::prefix('donasi')->name('donasi.')->group(function () {
         Route::get('/', [DonaturDonasiController::class, 'index'])->name('index'); 
         Route::get('/create/{kebutuhan}', [DonaturDonasiController::class, 'create'])->name('create');
         Route::post('/store', [DonaturDonasiController::class, 'store'])->name('store');
     });
     
-    // ============= RIWAYAT DONASI (Sederhanakan Penamaan) =============
-    // Nama route: donatur.riwayat & donatur.riwayat.show
-    Route::get('/riwayat', [DonaturDonasiController::class, 'riwayat'])->name('riwayat'); // NAMA DARI donatur.riwayat.index menjadi donatur.riwayat
-    Route::get('/riwayat/{donasi}', [DonaturDonasiController::class, 'show'])->name('riwayat.show'); 
+    // ============= RIWAYAT DONASI (FIXED) =============
+    // UBAH DARI donatur.riwayat MENJADI donatur.riwayat.index
+    Route::prefix('riwayat')->name('riwayat.')->group(function () {
+        Route::get('/', [DonaturDonasiController::class, 'riwayat'])->name('index'); // donatur.riwayat.index
+        Route::get('/{donasi}', [DonaturDonasiController::class, 'show'])->name('show'); // donatur.riwayat.show
+    });
 });

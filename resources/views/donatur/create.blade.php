@@ -4,7 +4,6 @@
 <link rel="stylesheet" href="{{ asset('css/donasi-create.css') }}">
 
 <div class="container my-5">
-    <!-- Alert Errors -->
     @if($errors->any())
         <div class="alert alert-danger mb-4">
             <strong>Terjadi Kesalahan:</strong>
@@ -24,7 +23,6 @@
     @endif
 
     <div class="row">
-        <!-- Form Donasi -->
         <div class="col-lg-7">
             <div class="form-donasi-card">
                 <h4 class="form-title">
@@ -36,7 +34,6 @@
                     @csrf
                     <input type="hidden" name="kebutuhan_id" value="{{ $kebutuhan->id }}">
 
-                    <!-- Kebutuhan yang Dipilih -->
                     <div class="form-group-custom">
                         <label class="form-label-custom">Kebutuhan yang Dipilih</label>
                         <div class="kebutuhan-alert">
@@ -48,7 +45,6 @@
                     </div>
 
                     @if($kebutuhan->jenis == 'uang')
-                        {{-- Form untuk Donasi Uang --}}
                         <div class="form-group-custom">
                             <label class="form-label-custom">
                                 Jumlah Donasi (Rp) <span class="required">*</span>
@@ -72,7 +68,6 @@
                             </small>
                         </div>
                     @else
-                        {{-- Form untuk Donasi Barang --}}
                         <div class="form-group-custom">
                             <label class="form-label-custom">
                                 Jumlah Donasi <span class="required">*</span>
@@ -98,7 +93,6 @@
                             </small>
                         </div>
 
-                        {{-- Nilai Estimasi untuk Barang --}}
                         <div class="form-group-custom">
                             <label class="form-label-custom">
                                 Nilai Estimasi (Rp) <span class="text-muted">(Opsional)</span>
@@ -118,7 +112,6 @@
                         </div>
                     @endif
 
-                    <!-- Pesan -->
                     <div class="form-group-custom">
                         <label class="form-label-custom">Pesan (Opsional)</label>
                         <textarea name="pesan" 
@@ -132,7 +125,6 @@
                         <small class="form-text-muted">Pesan Anda akan dilihat oleh admin</small>
                     </div>
 
-                    <!-- Bukti Transfer -->
                     <div class="form-group-custom">
                         <label class="form-label-custom">
                             Bukti Transfer/Pembelian <span class="required">*</span>
@@ -150,22 +142,19 @@
                             <i class="fas fa-info-circle"></i> Format: JPG, JPEG, PNG | Maksimal: 2MB
                         </small>
                         
-                        <!-- Preview Image -->
                         <div id="imagePreview" class="image-preview-container">
                             <p class="preview-label">Preview:</p>
                             <img id="preview" src="" class="preview-image">
                         </div>
                     </div>
 
-                    <!-- Warning -->
                     <div class="alert-warning-custom">
                         <i class="fas fa-exclamation-triangle"></i>
                         <strong>Penting!</strong> Pastikan bukti {{ $kebutuhan->jenis == 'uang' ? 'transfer' : 'pembelian/donasi' }} sudah benar sebelum mengirim. Donasi Anda akan diverifikasi oleh admin.
                     </div>
 
-                    <!-- Buttons -->
                     <div class="button-group">
-                        <button type="submit" class="btn-submit">
+                        <button type="submit" class="btn-submit" id="submitBtn">
                             <i class="fas fa-paper-plane"></i>
                             Kirim Donasi
                         </button>
@@ -178,9 +167,7 @@
             </div>
         </div>
 
-        <!-- Info Sidebar -->
         <div class="col-lg-5">
-            <!-- Detail Kebutuhan -->
             <div class="info-card">
                 <h6 class="info-card-title">
                     <i class="fas fa-info-circle"></i>
@@ -222,7 +209,6 @@
                 @endif
             </div>
 
-            <!-- Panduan Donasi -->
             <div class="info-card">
                 <h6 class="info-card-title">
                     <i class="fas fa-book"></i>
@@ -270,6 +256,38 @@
 </div>
 
 <script>
+// Mencegah double submit
+let isSubmitting = false;
+
+document.getElementById('donasiForm').addEventListener('submit', function(e) {
+    if (isSubmitting) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Set flag sedang submit
+    isSubmitting = true;
+    
+    // Disable submit button
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+    
+    // Convert formatted rupiah to numbers
+    const jumlahInput = document.getElementById('jumlah_donasi');
+    if (jumlahInput) {
+        jumlahInput.value = jumlahInput.value.replace(/\./g, '');
+    }
+    
+    const nilaiInput = document.getElementById('nilai_barang');
+    if (nilaiInput && nilaiInput.value) {
+        nilaiInput.value = nilaiInput.value.replace(/\./g, '');
+    }
+    
+    // Allow form to submit
+    return true;
+});
+
 // Preview Image
 function previewImage(event) {
     const file = event.target.files[0];
@@ -277,7 +295,6 @@ function previewImage(event) {
     const previewDiv = document.getElementById('imagePreview');
     
     if (file) {
-        // Validasi ukuran file (2MB)
         if (file.size > 2 * 1024 * 1024) {
             alert('Ukuran file terlalu besar! Maksimal 2MB');
             event.target.value = '';
@@ -285,7 +302,6 @@ function previewImage(event) {
             return;
         }
         
-        // Validasi tipe file
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         if (!validTypes.includes(file.type)) {
             alert('Format file tidak valid! Gunakan JPG, JPEG, atau PNG');
@@ -312,20 +328,5 @@ function formatRupiah(input) {
         input.value = formatted;
     }
 }
-
-// Submit form: convert formatted rupiah back to number
-document.getElementById('donasiForm').addEventListener('submit', function(e) {
-    const jumlahInput = document.getElementById('jumlah_donasi');
-    if (jumlahInput) {
-        // Hapus format titik sebelum submit
-        jumlahInput.value = jumlahInput.value.replace(/\./g, '');
-    }
-    
-    const nilaiInput = document.getElementById('nilai_barang');
-    if (nilaiInput && nilaiInput.value) {
-        // Hapus format titik sebelum submit
-        nilaiInput.value = nilaiInput.value.replace(/\./g, '');
-    }
-});
 </script>
 @endsection

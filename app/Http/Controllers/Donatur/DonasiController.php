@@ -10,7 +10,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; // Import untuk logging
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DonasiController extends Controller
 {
@@ -35,7 +36,6 @@ class DonasiController extends Controller
 
     public function create(Kebutuhan $kebutuhan)
     {
-        // PENTING: Pengecekan persentase yang lebih aman (walaupun persentase adalah accessor)
         if ($kebutuhan->status != 'aktif' || $kebutuhan->jumlah_terkumpul >= $kebutuhan->jumlah_target) {
             return redirect()->route('donatur.donasi.index')
                 ->with('error', 'Maaf, donasi untuk kebutuhan "' . $kebutuhan->nama_kebutuhan . '" sudah tercapai atau tidak aktif lagi.');
@@ -52,7 +52,7 @@ class DonasiController extends Controller
             return redirect()->back()->with('error', 'Kebutuhan donasi tidak ditemukan.')->withInput();
         }
 
-        // PENTING: Bersihkan format rupiah sebelum validasi (hapus titik pemisah ribuan)
+        // Bersihkan format rupiah sebelum validasi
         if ($request->has('jumlah_donasi')) {
             $request->merge([
                 'jumlah_donasi' => str_replace('.', '', $request->jumlah_donasi)
@@ -65,7 +65,7 @@ class DonasiController extends Controller
             ]);
         }
 
-        // Validasi dinamis berdasarkan jenis kebutuhan
+        // Validasi dinamis
         $rules = [
             'kebutuhan_id' => 'required|exists:kebutuhans,id',
             'jumlah_donasi' => 'required|numeric|min:1',
@@ -73,49 +73,48 @@ class DonasiController extends Controller
             'bukti_transfer' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ];
 
-        // Tambah validasi nilai_barang jika jenis barang
         if ($kebutuhan->jenis == 'barang') {
-            // Nilai barang bersifat opsional di view, pastikan validasi match dengan skema DB (nullable)
             $rules['nilai_barang'] = 'nullable|numeric|min:0';
         } else {
-            // Pastikan nilai_barang tidak masuk jika jenis uang
             $request->request->remove('nilai_barang');
         }
 
         $validated = $request->validate($rules);
 
-        // Pengecekan ganda status setelah validasi
+        // Pengecekan ganda status
         if ($kebutuhan->status != 'aktif' || $kebutuhan->jumlah_terkumpul >= $kebutuhan->jumlah_target) {
             return redirect()->route('donatur.donasi.index')
                 ->with('error', 'Donasi gagal. Kebutuhan "' . $kebutuhan->nama_kebutuhan . '" telah mencapai target atau tidak aktif.');
         }
 
-        $path = null;
-        if ($request->hasFile('bukti_transfer')) {
-            $file = $request->file('bukti_transfer');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            // Simpan file
-            $path = $file->storeAs('bukti_transfer', $filename, 'public'); 
-        }
-
-        $donasiData = [
-            'user_id' => Auth::id(), 
-            'kebutuhan_id' => $validated['kebutuhan_id'],
-            'jumlah_donasi' => $validated['jumlah_donasi'],
-            'nilai_barang' => $validated['nilai_barang'] ?? null,
-            'pesan' => $validated['pesan'],
-            'bukti_transfer' => $path,
-            'status' => 'menunggu',
-        ];
-
+        // GUNAKAN DB TRANSACTION untuk mencegah duplikasi
+        DB::beginTransaction();
         try {
+            // Upload file
+            $path = null;
+            if ($request->hasFile('bukti_transfer')) {
+                $file = $request->file('bukti_transfer');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('bukti_transfer', $filename, 'public'); 
+            }
+
+            // Simpan donasi
+            $donasiData = [
+                'user_id' => Auth::id(), 
+                'kebutuhan_id' => $validated['kebutuhan_id'],
+                'jumlah_donasi' => $validated['jumlah_donasi'],
+                'nilai_barang' => $validated['nilai_barang'] ?? null,
+                'pesan' => $validated['pesan'],
+                'bukti_transfer' => $path,
+                'status' => 'menunggu',
+            ];
+
             $donasi = Donasi::create($donasiData);
 
             // Format jumlah untuk notifikasi
             if ($kebutuhan->jenis == 'uang') {
                 $jumlahFormatted = 'Rp ' . number_format($validated['jumlah_donasi'], 0, ',', '.');
             } else {
-                // Diubah dari 2 menjadi 0 desimal agar lebih konsisten untuk hitungan barang (pcs, unit)
                 $jumlahFormatted = number_format($validated['jumlah_donasi'], 0, ',', '.') . ' ' . ($kebutuhan->satuan ?? 'pcs');
             }
 
@@ -125,8 +124,8 @@ class DonasiController extends Controller
                 'type' => 'donasi_menunggu',
                 'title' => 'Donasi Berhasil Dikirim',
                 'message' => 'Donasi Anda untuk "' . $kebutuhan->nama_kebutuhan . '" sebesar ' . $jumlahFormatted . ' sedang menunggu verifikasi admin.',
-                // PERBAIKAN: Menggunakan nama route yang benar donatur.riwayat.show
-                'link' => route('donatur.riwayat.show', $donasi->id) 
+                'link' => route('donatur.riwayat.show', $donasi->id),
+                'is_read' => false
             ]);
 
             // NOTIFIKASI #2: Notifikasi untuk Admin
@@ -137,25 +136,33 @@ class DonasiController extends Controller
                     'type' => 'donasi_baru',
                     'title' => 'Donasi Baru Masuk',
                     'message' => 'Donasi baru dari ' . Auth::user()->name . ' untuk "' . $kebutuhan->nama_kebutuhan . '" menunggu verifikasi.',
-                    'link' => route('admin.donasi.show', $donasi->id)
+                    'link' => route('admin.donasi.show', $donasi->id),
+                    'is_read' => false
                 ]);
             }
 
-            // PERBAIKAN: Menggunakan nama route yang telah disederhanakan (donatur.riwayat)
-            return redirect()->route('donatur.riwayat') 
+            // Commit transaction
+            DB::commit();
+
+            return redirect()->route('donatur.riwayat.index') 
                 ->with('success', 'Donasi berhasil dikirim! Menunggu verifikasi admin.');
+
         } catch (\Exception $e) {
-            // Log error spesifik (ini membantu debugging error database/storage)
+            // Rollback jika ada error
+            DB::rollback();
+            
+            // Hapus file jika sudah terupload
             if ($path) {
                 Storage::disk('public')->delete($path);
             }
             
-            Log::error("Donasi Store Failed for User " . Auth::id() . ": " . $e->getMessage() . " on line " . $e->getLine(), [
+            Log::error("Donasi Store Failed for User " . Auth::id() . ": " . $e->getMessage(), [
+                'line' => $e->getLine(),
                 'stack' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat menyimpan donasi. Coba lagi.')
+                ->with('error', 'Terjadi kesalahan saat menyimpan donasi. Silakan coba lagi.')
                 ->withInput();
         }
     }

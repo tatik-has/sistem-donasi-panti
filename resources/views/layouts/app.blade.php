@@ -258,6 +258,29 @@
         .notification-footer a:hover {
             text-decoration: underline;
         }
+
+        /* Smooth scroll */
+        .notification-list {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
     </style>
 </head>
 <body>
@@ -291,9 +314,10 @@
                                 </a>
                             </li>
                             
+                            {{-- FIXED: Ubah dari donatur.riwayat jadi donatur.riwayat.index --}}
                             <li class="nav-item d-none d-md-block">
-                                <a class="nav-link {{ request()->routeIs('donatur.riwayat') ? 'active-menu' : '' }}" 
-                                   href="{{ route('donatur.riwayat') }}">
+                                <a class="nav-link {{ request()->routeIs('donatur.riwayat.*') ? 'active-menu' : '' }}" 
+                                   href="{{ route('donatur.riwayat.index') }}">
                                     <i class="fas fa-history me-1"></i> Riwayat Donasi
                                 </a>
                             </li>
@@ -312,7 +336,10 @@
                                     </div>
                                     
                                     <div class="notification-list" id="notificationList">
-                                        <!-- Notifikasi akan dimuat via JavaScript -->
+                                        <div class="notification-empty">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            <p>Memuat notifikasi...</p>
+                                        </div>
                                     </div>
                                     
                                     <div class="notification-footer">
@@ -332,9 +359,17 @@
                                     </a>
 
                                     <div class="dropdown-divider d-md-none"></div>
-                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.dashboard') }}">Dashboard</a>
-                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.donasi.index') }}">Donasi Aktif</a>
-                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.riwayat') }}">Riwayat Donasi</a>
+                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.dashboard') }}">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a>
+                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.donasi.index') }}">
+                                        <i class="fas fa-hand-holding-heart"></i> Donasi Aktif
+                                    </a>
+                                    
+                                    {{-- FIXED: Ubah dari donatur.riwayat jadi donatur.riwayat.index --}}
+                                    <a class="dropdown-item d-md-none" href="{{ route('donatur.riwayat.index') }}">
+                                        <i class="fas fa-history"></i> Riwayat Donasi
+                                    </a>
                                     
                                     <div class="dropdown-divider"></div>
 
@@ -380,28 +415,45 @@
         
         if (!bell) return;
 
+        // Toggle notification menu
         bell.addEventListener('click', function(e) {
             e.stopPropagation();
             menu.classList.toggle('show');
-            loadNotifications();
+            if (menu.classList.contains('show')) {
+                loadNotifications();
+            }
         });
         
+        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!menu.contains(e.target) && !bell.contains(e.target)) {
                 menu.classList.remove('show');
             }
         });
         
+        // Load notifications
         function loadNotifications() {
             fetch('/notifications/unread')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
                     updateBadge(data.unread_count);
                     renderNotifications(data.notifications);
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                    list.innerHTML = `
+                        <div class="notification-empty">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Gagal memuat notifikasi</p>
+                        </div>
+                    `;
+                });
         }
         
+        // Update badge count
         function updateBadge(count) {
             if (count > 0) {
                 badge.textContent = count > 99 ? '99+' : count;
@@ -411,6 +463,7 @@
             }
         }
         
+        // Render notifications
         function renderNotifications(notifications) {
             if (notifications.length === 0) {
                 list.innerHTML = `
@@ -434,8 +487,8 @@
                                 <i class="fas ${getIcon(notif.type)}"></i>
                             </div>
                             <div class="notification-text">
-                                <div class="notification-title">${notif.title}</div>
-                                <div class="notification-message">${notif.message}</div>
+                                <div class="notification-title">${escapeHtml(notif.title)}</div>
+                                <div class="notification-message">${escapeHtml(notif.message)}</div>
                                 <div class="notification-time">${timeAgo}</div>
                             </div>
                         </div>
@@ -444,32 +497,39 @@
             }).join('');
         }
         
+        // Get icon class based on notification type
         function getIconClass(type) {
             const types = {
                 'donasi_baru': 'info',
                 'donasi_berhasil': 'success',
                 'donasi_ditolak': 'danger',
                 'donasi_menunggu': 'warning',
-                'kebutuhan_baru': 'info'
+                'kebutuhan_baru': 'info',
+                'kebutuhan_tercapai': 'success'
             };
             return types[type] || 'info';
         }
         
+        // Get icon based on notification type
         function getIcon(type) {
             const icons = {
                 'donasi_baru': 'fa-hand-holding-usd',
                 'donasi_berhasil': 'fa-check-circle',
                 'donasi_ditolak': 'fa-times-circle',
                 'donasi_menunggu': 'fa-clock',
-                'kebutuhan_baru': 'fa-bullhorn'
+                'kebutuhan_baru': 'fa-bullhorn',
+                'kebutuhan_tercapai': 'fa-trophy'
             };
             return icons[type] || 'fa-bell';
         }
         
+        // Format time ago
         function formatTimeAgo(dateString) {
             const date = new Date(dateString);
             const now = new Date();
             const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Baru saja';
             
             const intervals = {
                 tahun: 31536000,
@@ -490,6 +550,14 @@
             return 'Baru saja';
         }
         
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Mark all as read
         if (markAllBtn) {
             markAllBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -498,18 +566,28 @@
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to mark as read');
+                    return response.json();
+                })
                 .then(data => {
                     loadNotifications();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error marking as read:', error);
+                    alert('Gagal menandai notifikasi sebagai sudah dibaca');
+                });
             });
         }
         
+        // Initial load
         loadNotifications();
+        
+        // Auto refresh every 30 seconds
         setInterval(loadNotifications, 30000);
     });
     </script>
