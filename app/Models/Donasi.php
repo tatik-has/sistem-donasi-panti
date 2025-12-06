@@ -17,7 +17,15 @@ class Donasi extends Model
         'pesan',
         'bukti_transfer',
         'status',
-        'catatan_admin'
+        'keterangan_admin',     // PENTING: ganti dari catatan_admin
+        'tanggal_verifikasi'    // PENTING: tambahkan ini
+    ];
+
+    // Cast tanggal sebagai datetime
+    protected $casts = [
+        'tanggal_verifikasi' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relasi ke User (Donatur)

@@ -59,132 +59,132 @@ class DonasiController extends Controller
     }
 
     public function verifikasi(Request $request, $id)
-    {
-        // Log untuk debugging
-        Log::info('Verifikasi dimulai', [
-            'donasi_id' => $id,
-            'request_data' => $request->all()
-        ]);
+{
+    // Cari donasi berdasarkan ID
+    $donasi = Donasi::findOrFail($id);
+    
+    // Log untuk debugging
+    Log::info('Verifikasi dimulai', [
+        'donasi_id' => $donasi->id,
+        'request_data' => $request->all()
+    ]);
 
-        // Cari donasi berdasarkan ID
-        $donasi = Donasi::findOrFail($id);
+    // Validasi input
+    $validated = $request->validate([
+        'status' => 'required|in:berhasil,ditolak',
+        'keterangan_admin' => 'nullable|string|max:500'
+    ]);
 
-        // Validasi input
-        $validated = $request->validate([
-            'status' => 'required|in:berhasil,ditolak',
-            'keterangan_admin' => 'nullable|string|max:500'
-        ]);
+    $statusLama = $donasi->status;
+    $statusBaru = $validated['status'];
 
-        $statusLama = $donasi->status;
-        $statusBaru = $validated['status'];
-
-        // Validasi: Jika sudah berhasil, tidak bisa diubah lagi
-        if ($statusLama === 'berhasil') {
-            Log::warning('Percobaan mengubah donasi yang sudah berhasil', ['donasi_id' => $id]);
-            return redirect()->route('admin.donasi.show', $donasi->id)
-                ->with('error', 'Donasi yang sudah berhasil tidak dapat diubah statusnya.');
-        }
-
-        // Validasi: Jika status tidak berubah
-        if ($statusLama === $statusBaru) {
-            return redirect()->route('admin.donasi.show', $donasi->id)
-                ->with('info', 'Status donasi tidak berubah.');
-        }
-
-        DB::beginTransaction();
-        try {
-            // Update status donasi dengan tanggal verifikasi
-            $donasi->update([
-                'status' => $statusBaru,
-                'keterangan_admin' => $validated['keterangan_admin'] ?? null,
-                'tanggal_verifikasi' => now()
-            ]);
-
-            $kebutuhan = $donasi->kebutuhan;
-
-            // FORMAT JUMLAH DONASI
-            if ($kebutuhan->jenis == 'uang') {
-                $jumlahFormatted = 'Rp ' . number_format($donasi->jumlah_donasi, 0, ',', '.');
-            } else {
-                $jumlahFormatted = number_format($donasi->jumlah_donasi, 0, ',', '.') . ' ' . ($kebutuhan->satuan ?? 'pcs');
-            }
-
-            // === JIKA STATUS BERHASIL ===
-            if ($statusBaru === 'berhasil') {
-                // Update jumlah terkumpul
-                $kebutuhan->increment('jumlah_terkumpul', $donasi->jumlah_donasi);
-                $kebutuhan->refresh();
-
-                // Notifikasi untuk DONATUR
-                Notification::create([
-                    'user_id' => $donasi->user_id,
-                    'type' => 'donasi_berhasil',
-                    'title' => '✅ Donasi Diverifikasi',
-                    'message' => 'Donasi Anda untuk "' . $kebutuhan->nama_kebutuhan . '" sebesar ' . $jumlahFormatted . ' telah diverifikasi dan diterima. Terima kasih atas kontribusi Anda!',
-                    'link' => route('donatur.riwayat'),
-                    'is_read' => false
-                ]);
-
-                // Cek apakah target tercapai
-                if ($kebutuhan->jumlah_target > 0 && $kebutuhan->jumlah_terkumpul >= $kebutuhan->jumlah_target) {
-                    // Notifikasi untuk SEMUA USER (target tercapai)
-                    $users = User::all();
-                    foreach ($users as $user) {
-                        Notification::create([
-                            'user_id' => $user->id,
-                            'type' => 'kebutuhan_tercapai',
-                            'title' => '🎉 Target Tercapai!',
-                            'message' => 'Kebutuhan "' . $kebutuhan->nama_kebutuhan . '" telah mencapai target 100%! Terima kasih atas semua donasi!',
-                            'link' => route('donatur.donasi.index'),
-                            'is_read' => false
-                        ]);
-                    }
-                    
-                    // Nonaktifkan kebutuhan karena target sudah tercapai
-                    $kebutuhan->update(['status' => 'nonaktif']); 
-                }
-
-                Log::info('Donasi berhasil diverifikasi', ['donasi_id' => $id]);
-            }
-            // === JIKA STATUS DITOLAK ===
-            elseif ($statusBaru === 'ditolak') {
-                // Jika sebelumnya sudah berhasil, kembalikan jumlah terkumpul
-                if ($statusLama === 'berhasil') {
-                    $kebutuhan->decrement('jumlah_terkumpul', $donasi->jumlah_donasi);
-                    $kebutuhan->refresh();
-                }
-
-                // Notifikasi untuk DONATUR
-                Notification::create([
-                    'user_id' => $donasi->user_id,
-                    'type' => 'donasi_ditolak',
-                    'title' => '❌ Donasi Ditolak',
-                    'message' => 'Maaf, donasi Anda untuk "' . $kebutuhan->nama_kebutuhan . '" sebesar ' . $jumlahFormatted . ' tidak dapat diverifikasi. ' . 
-                                ($validated['keterangan_admin'] ? 'Alasan: ' . $validated['keterangan_admin'] : 'Silakan hubungi admin untuk informasi lebih lanjut.'),
-                    'link' => route('donatur.riwayat'),
-                    'is_read' => false
-                ]);
-
-                Log::info('Donasi ditolak', ['donasi_id' => $id]);
-            }
-
-            DB::commit();
-
-            return redirect()->route('admin.donasi.show', $donasi->id)
-                ->with('success', 'Status donasi berhasil diperbarui menjadi ' . $statusBaru . ' dan notifikasi telah dikirim ke donatur.');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error saat verifikasi donasi', [
-                'donasi_id' => $id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->route('admin.donasi.show', $donasi->id)
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+    // Validasi: Jika sudah berhasil, tidak bisa diubah lagi
+    if ($statusLama === 'berhasil') {
+        Log::warning('Percobaan mengubah donasi yang sudah berhasil', ['donasi_id' => $donasi->id]);
+        return redirect()->route('admin.donasi.show', $donasi->id)
+            ->with('error', 'Donasi yang sudah berhasil tidak dapat diubah statusnya.');
     }
+
+    // Validasi: Jika status tidak berubah
+    if ($statusLama === $statusBaru) {
+        return redirect()->route('admin.donasi.show', $donasi->id)
+            ->with('info', 'Status donasi tidak berubah.');
+    }
+
+    DB::beginTransaction();
+    try {
+        // Update status donasi dengan tanggal verifikasi
+        $donasi->update([
+            'status' => $statusBaru,
+            'keterangan_admin' => $validated['keterangan_admin'] ?? null,
+            'tanggal_verifikasi' => now()
+        ]);
+
+        $kebutuhan = $donasi->kebutuhan;
+
+        // FORMAT JUMLAH DONASI
+        if ($kebutuhan->jenis == 'uang') {
+            $jumlahFormatted = 'Rp ' . number_format($donasi->jumlah_donasi, 0, ',', '.');
+        } else {
+            $jumlahFormatted = number_format($donasi->jumlah_donasi, 0, ',', '.') . ' ' . ($kebutuhan->satuan ?? 'pcs');
+        }
+
+        // === JIKA STATUS BERHASIL ===
+        if ($statusBaru === 'berhasil') {
+            // Update jumlah terkumpul
+            $kebutuhan->increment('jumlah_terkumpul', $donasi->jumlah_donasi);
+            $kebutuhan->refresh();
+
+            // Notifikasi untuk DONATUR
+            Notification::create([
+                'user_id' => $donasi->user_id,
+                'type' => 'donasi_berhasil',
+                'title' => '✅ Donasi Diverifikasi',
+                'message' => 'Donasi Anda untuk "' . $kebutuhan->nama_kebutuhan . '" sebesar ' . $jumlahFormatted . ' telah diverifikasi dan diterima. Terima kasih atas kontribusi Anda!',
+                'link' => route('donatur.riwayat.index'),
+                'is_read' => false
+            ]);
+
+            // Cek apakah target tercapai
+            if ($kebutuhan->jumlah_target > 0 && $kebutuhan->jumlah_terkumpul >= $kebutuhan->jumlah_target) {
+                // Notifikasi untuk SEMUA USER (target tercapai)
+                $users = User::all();
+                foreach ($users as $user) {
+                    Notification::create([
+                        'user_id' => $user->id,
+                        'type' => 'kebutuhan_tercapai',
+                        'title' => '🎉 Target Tercapai!',
+                        'message' => 'Kebutuhan "' . $kebutuhan->nama_kebutuhan . '" telah mencapai target 100%! Terima kasih atas semua donasi!',
+                        'link' => route('donatur.donasi.index'),
+                        'is_read' => false
+                    ]);
+                }
+                
+                // Nonaktifkan kebutuhan karena target sudah tercapai
+                $kebutuhan->update(['status' => 'nonaktif']); 
+            }
+
+            Log::info('Donasi berhasil diverifikasi', ['donasi_id' => $donasi->id]);
+        }
+        // === JIKA STATUS DITOLAK ===
+        elseif ($statusBaru === 'ditolak') {
+            // Jika sebelumnya sudah berhasil, kembalikan jumlah terkumpul
+            if ($statusLama === 'berhasil') {
+                $kebutuhan->decrement('jumlah_terkumpul', $donasi->jumlah_donasi);
+                $kebutuhan->refresh();
+            }
+
+            // Notifikasi untuk DONATUR
+            Notification::create([
+                'user_id' => $donasi->user_id,
+                'type' => 'donasi_ditolak',
+                'title' => '❌ Donasi Ditolak',
+                'message' => 'Maaf, donasi Anda untuk "' . $kebutuhan->nama_kebutuhan . '" sebesar ' . $jumlahFormatted . ' tidak dapat diverifikasi. ' . 
+                            ($validated['keterangan_admin'] ? 'Alasan: ' . $validated['keterangan_admin'] : 'Silakan hubungi admin untuk informasi lebih lanjut.'),
+                'link' => route('donatur.riwayat.index'),
+                'is_read' => false
+            ]);
+
+            Log::info('Donasi ditolak', ['donasi_id' => $donasi->id]);
+        }
+
+        DB::commit();
+
+        return redirect()->route('admin.donasi.show', $donasi->id)
+            ->with('success', 'Status donasi berhasil diperbarui menjadi ' . $statusBaru . ' dan notifikasi telah dikirim ke donatur.');
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        Log::error('Error saat verifikasi donasi', [
+            'donasi_id' => $donasi->id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return redirect()->route('admin.donasi.show', $donasi->id)
+            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    }
+}
 
     public function destroy(Donasi $donasi)
     {

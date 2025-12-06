@@ -10,10 +10,14 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->isAdmin()) {
-            return $next($request);
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
-        return redirect('/')->with('error', 'Akses ditolak. Anda bukan admin.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return $next($request);
     }
 }
