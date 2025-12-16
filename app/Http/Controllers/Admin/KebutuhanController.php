@@ -4,131 +4,217 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kebutuhan;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class KebutuhanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua kebutuhan dengan pagination
-        $kebutuhans = Kebutuhan::orderBy('created_at', 'desc')->paginate(10);
-        
-        // Hitung statistik kebutuhan aktif dan non-aktif
+        $query = Kebutuhan::query();
+
+        // Filter berdasarkan status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter berdasarkan jenis
+        if ($request->has('jenis') && $request->jenis != '') {
+            $query->where('jenis', $request->jenis);
+        }
+
+        $kebutuhans = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Hitung statistik
         $totalAktif = Kebutuhan::where('status', 'aktif')->count();
         $totalNonAktif = Kebutuhan::where('status', 'nonaktif')->count();
-        
-        return view('admin.kebutuhan.index', compact(
-            'kebutuhans',
-            'totalAktif',
-            'totalNonAktif'
-        ));
+
+        return view('admin.kebutuhan.index', compact('kebutuhans', 'totalAktif', 'totalNonAktif'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('admin.kebutuhan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $rules = [
+        // Validasi input
+        $validated = $request->validate([
             'nama_kebutuhan' => 'required|string|max:255',
             'jenis' => 'required|in:uang,barang',
             'deskripsi' => 'required|string',
             'jumlah_target' => 'nullable|numeric|min:0',
-            'status' => 'required|in:aktif,nonaktif',
-        ];
+            'satuan' => 'required|string|max:50',
+            'status' => 'required|in:aktif,nonaktif'
+        ]);
 
-        // Validasi satuan berdasarkan jenis
-        if ($request->jenis == 'barang') {
-            $rules['satuan'] = 'required|string|max:50';
+        DB::beginTransaction();
+        try {
+            // Buat kebutuhan baru
+            $kebutuhan = Kebutuhan::create([
+                'nama_kebutuhan' => $validated['nama_kebutuhan'],
+                'jenis' => $validated['jenis'],
+                'deskripsi' => $validated['deskripsi'],
+                'jumlah_target' => $validated['jumlah_target'] ?? 0,
+                'jumlah_terkumpul' => 0,
+                'satuan' => $validated['satuan'],
+                'status' => $validated['status']
+            ]);
+
+            // KIRIM NOTIFIKASI KE SEMUA DONATUR jika status aktif
+            if ($kebutuhan->status === 'aktif') {
+                $this->kirimNotifikasiKebutuhanBaru($kebutuhan);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.kebutuhan.index')
+                ->with('success', 'Kebutuhan berhasil ditambahkan dan notifikasi telah dikirim ke semua donatur!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error saat membuat kebutuhan', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan kebutuhan: ' . $e->getMessage());
         }
-
-        $validated = $request->validate($rules);
-
-        // Set satuan otomatis untuk uang
-        if ($validated['jenis'] == 'uang') {
-            $validated['satuan'] = 'Rupiah';
-        }
-
-        // Set default jumlah_terkumpul
-        $validated['jumlah_terkumpul'] = 0;
-
-        Kebutuhan::create($validated);
-
-        return redirect()->route('admin.kebutuhan.index')
-            ->with('success', 'Kebutuhan berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Kebutuhan $kebutuhan)
-    {
-        return view('admin.kebutuhan.show', compact('kebutuhan'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Kebutuhan $kebutuhan)
     {
         return view('admin.kebutuhan.edit', compact('kebutuhan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Kebutuhan $kebutuhan)
     {
-        $rules = [
+        // Validasi input
+        $validated = $request->validate([
             'nama_kebutuhan' => 'required|string|max:255',
             'jenis' => 'required|in:uang,barang',
             'deskripsi' => 'required|string',
             'jumlah_target' => 'nullable|numeric|min:0',
-            'status' => 'required|in:aktif,nonaktif',
-        ];
+            'satuan' => 'required|string|max:50',
+            'status' => 'required|in:aktif,nonaktif'
+        ]);
 
-        // Validasi satuan berdasarkan jenis
-        if ($request->jenis == 'barang') {
-            $rules['satuan'] = 'required|string|max:50';
+        DB::beginTransaction();
+        try {
+            $statusLama = $kebutuhan->status;
+            
+            // Update kebutuhan
+            $kebutuhan->update([
+                'nama_kebutuhan' => $validated['nama_kebutuhan'],
+                'jenis' => $validated['jenis'],
+                'deskripsi' => $validated['deskripsi'],
+                'jumlah_target' => $validated['jumlah_target'] ?? 0,
+                'satuan' => $validated['satuan'],
+                'status' => $validated['status']
+            ]);
+
+            // KIRIM NOTIFIKASI jika status berubah dari nonaktif ke aktif
+            if ($statusLama === 'nonaktif' && $validated['status'] === 'aktif') {
+                $this->kirimNotifikasiKebutuhanBaru($kebutuhan);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.kebutuhan.index')
+                ->with('success', 'Kebutuhan berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error saat mengupdate kebutuhan', [
+                'kebutuhan_id' => $kebutuhan->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui kebutuhan: ' . $e->getMessage());
         }
+    }
 
-        $validated = $request->validate($rules);
+    public function destroy(Kebutuhan $kebutuhan)
+    {
+        DB::beginTransaction();
+        try {
+            // Cek apakah ada donasi terkait
+            $jumlahDonasi = $kebutuhan->donasis()->count();
+            
+            if ($jumlahDonasi > 0) {
+                return redirect()->route('admin.kebutuhan.index')
+                    ->with('error', 'Tidak dapat menghapus kebutuhan yang sudah memiliki donasi. Total donasi: ' . $jumlahDonasi);
+            }
 
-        // Set satuan otomatis untuk uang
-        if ($validated['jenis'] == 'uang') {
-            $validated['satuan'] = 'Rupiah';
+            $kebutuhan->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.kebutuhan.index')
+                ->with('success', 'Kebutuhan berhasil dihapus');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error saat menghapus kebutuhan', [
+                'kebutuhan_id' => $kebutuhan->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()->route('admin.kebutuhan.index')
+                ->with('error', 'Gagal menghapus kebutuhan: ' . $e->getMessage());
         }
-
-        $kebutuhan->update($validated);
-
-        return redirect()->route('admin.kebutuhan.index')
-            ->with('success', 'Kebutuhan berhasil diperbarui!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * FUNGSI BARU: Kirim notifikasi kebutuhan baru ke semua donatur
      */
-    public function destroy(Kebutuhan $kebutuhan)
+    private function kirimNotifikasiKebutuhanBaru(Kebutuhan $kebutuhan)
     {
         try {
-            $kebutuhan->delete();
-            
-            return redirect()->route('admin.kebutuhan.index')
-                ->with('success', 'Kebutuhan berhasil dihapus!');
+            // Ambil semua user dengan role donatur
+            $donaturs = User::where('role', 'donatur')->get();
+
+            // Format jumlah target
+            if ($kebutuhan->jenis == 'uang') {
+                $targetFormatted = 'Rp ' . number_format($kebutuhan->jumlah_target, 0, ',', '.');
+            } else {
+                $targetFormatted = number_format($kebutuhan->jumlah_target, 0, ',', '.') . ' ' . $kebutuhan->satuan;
+            }
+
+            // Buat notifikasi untuk setiap donatur
+            foreach ($donaturs as $donatur) {
+                Notification::create([
+                    'user_id' => $donatur->id,
+                    'type' => 'kebutuhan_baru',
+                    'title' => '🆕 Kebutuhan Donasi Baru',
+                    'message' => 'Panti membutuhkan bantuan: "' . $kebutuhan->nama_kebutuhan . '"' . 
+                                ($kebutuhan->jumlah_target > 0 ? ' dengan target ' . $targetFormatted : '') . 
+                                '. Mari berdonasi dan berbagi kebahagiaan!',
+                    'link' => route('donatur.donasi.index'),
+                    'is_read' => false
+                ]);
+            }
+
+            Log::info('Notifikasi kebutuhan baru berhasil dikirim', [
+                'kebutuhan_id' => $kebutuhan->id,
+                'jumlah_donatur' => $donaturs->count()
+            ]);
+
         } catch (\Exception $e) {
-            return redirect()->route('admin.kebutuhan.index')
-                ->with('error', 'Gagal menghapus kebutuhan. Silakan coba lagi.');
+            Log::error('Error saat mengirim notifikasi kebutuhan baru', [
+                'kebutuhan_id' => $kebutuhan->id,
+                'error' => $e->getMessage()
+            ]);
+            // Tidak throw exception agar proses create/update tetap berhasil
         }
     }
 }

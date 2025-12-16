@@ -13,19 +13,15 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        // Menggunakan relasi `notifications` pada user model untuk notifikasi yang menggunakan sistem notifikasi bawaan Laravel.
-        // Namun, karena Anda menggunakan model `Notification` kustom dengan kolom `user_id` dan `is_read`,
-        // kita akan tetap menggunakan query kustom Anda.
         $notifications = Notification::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return view('notifications.index', compact('notifications'));
-        // Pastikan Anda sudah membuat view: resources/views/notifications/index.blade.php
     }
 
     /**
-     * Mengambil notifikasi yang belum dibaca (max 5) dan jumlah yang belum dibaca.
+     * Mengambil notifikasi yang belum dibaca (max 7) dan jumlah yang belum dibaca.
      * Digunakan oleh JavaScript untuk dropdown di layout.
      */
     public function unread(Request $request)
@@ -37,15 +33,28 @@ class NotificationController extends Controller
         }
         
         // Ambil notifikasi terbaru (maks 7) untuk dropdown
-        $notifications = $user->notifications()
+        $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->limit(7) // Batasi jumlah di dropdown
-            ->get();
+            ->limit(7)
+            ->get()
+            ->map(function($notif) {
+                return [
+                    'id' => $notif->id,
+                    'type' => $notif->type,
+                    'title' => $notif->title,
+                    'message' => $notif->message,
+                    'link' => $notif->link,
+                    'is_read' => $notif->is_read,
+                    'created_at' => $notif->created_at->diffForHumans(),
+                    'icon' => $this->getNotificationIcon($notif->type),
+                    'color' => $this->getNotificationColor($notif->type)
+                ];
+            });
 
         // Hitung jumlah notifikasi yang belum dibaca
-        // Catatan: Jika Anda menggunakan model `Notification` kustom, pastikan relasi `notifications` di model `User` mengarah ke model ini.
-        // Jika tidak, Anda bisa menggunakan query langsung ke model Notification:
-        $unreadCount = Notification::where('user_id', Auth::id())->where('is_read', false)->count();
+        $unreadCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
 
         return response()->json([
             'notifications' => $notifications,
@@ -55,7 +64,6 @@ class NotificationController extends Controller
 
     /**
      * Menandai notifikasi tertentu sebagai sudah dibaca dan mengarahkan ke tautan yang ditentukan.
-     * NAMA METHOD INI TELAH DIPERBAIKI DARI 'read' MENJADI 'markAsRead'
      */
     public function markAsRead($id)
     {
@@ -72,15 +80,15 @@ class NotificationController extends Controller
 
     /**
      * Menandai SEMUA notifikasi pengguna sebagai sudah dibaca.
-     * NAMA METHOD INI TELAH DIPERBAIKI DARI 'markAllRead' MENJADI 'markAllAsRead'
      */
     public function markAllAsRead(Request $request)
     {
-        Notification::where('user_id', Auth::id())->update(['is_read' => true]);
-        // Catatan: Menggunakan query langsung ke model Notification lebih eksplisit
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Semua notifikasi telah ditandai sebagai sudah dibaca']);
         }
 
         return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai sudah dibaca.');
@@ -98,5 +106,37 @@ class NotificationController extends Controller
         $notification->delete();
 
         return redirect()->route('notifications.index')->with('success', 'Notifikasi berhasil dihapus.');
+    }
+
+    /**
+     * Helper function untuk mendapatkan icon notifikasi berdasarkan type
+     */
+    private function getNotificationIcon($type)
+    {
+        $icons = [
+            'donasi_baru' => 'fa-hand-holding-usd',
+            'donasi_berhasil' => 'fa-check-circle',
+            'donasi_ditolak' => 'fa-times-circle',
+            'donasi_menunggu' => 'fa-clock',
+            'kebutuhan_baru' => 'fa-bullhorn',
+            'kebutuhan_tercapai' => 'fa-trophy'
+        ];
+        return $icons[$type] ?? 'fa-bell';
+    }
+
+    /**
+     * Helper function untuk mendapatkan warna notifikasi berdasarkan type
+     */
+    private function getNotificationColor($type)
+    {
+        $colors = [
+            'donasi_baru' => 'info',
+            'donasi_berhasil' => 'success',
+            'donasi_ditolak' => 'danger',
+            'donasi_menunggu' => 'warning',
+            'kebutuhan_baru' => 'primary',
+            'kebutuhan_tercapai' => 'success'
+        ];
+        return $colors[$type] ?? 'secondary';
     }
 }
